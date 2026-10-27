@@ -1,0 +1,12 @@
+services:
+  mongodb:
+    image: mongo:7-jammy
+    container_name: ermes-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: ermes
+    volumes:
+      - ./data:/data/db
+
