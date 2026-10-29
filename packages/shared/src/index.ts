@@ -32,3 +32,19 @@ export const BatchTrafficLogsSchema = z.object({
   logs: z.array(TrafficLogEntrySchema).min(1),
 });
 export type BatchTrafficLogs = z.infer<typeof BatchTrafficLogsSchema>;
+
+export const AgentCredentialsSchema = z.object({
+  agentId: z.string().min(1),
+  clientSecret: z.string().min(1).optional(),
+  userId: z.string().min(1),
+});
+export type AgentCredentials = z.infer<typeof AgentCredentialsSchema>;
+
+export const AgentConfigSchema = z.object({
+  backendUrl: z.string().url().default('http://localhost:3000'),
+  agentId: z.string().min(1).default('agent-worker-01'),
+  authToken: z.string().min(1).optional(),
+  simulationIntervalMs: z.coerce.number().int().positive().default(1000),
+  userId: z.string().min(1).default('user-endpoint-42'),
+});
+export type AgentConfig = z.infer<typeof AgentConfigSchema>;

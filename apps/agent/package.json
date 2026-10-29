@@ -1,0 +1,25 @@
+{
+  "name": "@ermes/agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts --loop",
+    "start": "tsx src/index.ts",
+    "simulate": "tsx src/index.ts --loop",
+    "build": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@ermes/shared": "workspace:*",
+    "dotenv": "^18.0.9"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.9",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.7"
+  }
+}
