@@ -12,7 +12,7 @@ build
 .env.*.local
 !.env.example
 
-# Database data mount
+# Database data
 data/
 
 # OS and IDE
