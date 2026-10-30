@@ -48,3 +48,41 @@ export const AgentConfigSchema = z.object({
   userId: z.string().min(1).default('user-endpoint-42'),
 });
 export type AgentConfig = z.infer<typeof AgentConfigSchema>;
+
+export const TrafficLogsFilterSchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+  page: z.coerce.number().int().min(1).default(1),
+  cursor: z.string().optional(),
+  agentId: z.string().optional(),
+  userId: z.string().optional(),
+  method: HttpMethodSchema.optional(),
+  threatScoreMin: z.coerce.number().min(0).max(100).optional(),
+  threatScoreMax: z.coerce.number().min(0).max(100).optional(),
+  search: z.string().optional(),
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
+});
+export type TrafficLogsFilter = z.infer<typeof TrafficLogsFilterSchema>;
+
+export const TrafficLogsListResponseSchema = z.object({
+  logs: z.array(TrafficLogEntrySchema),
+  total: z.number().int().nonnegative().optional(),
+  nextCursor: z.string().optional(),
+});
+export type TrafficLogsListResponse = z.infer<typeof TrafficLogsListResponseSchema>;
+
+export const ValidationErrorDetailSchema = z.object({
+  path: z.array(z.union([z.string(), z.number()])),
+  message: z.string(),
+  code: z.string().optional(),
+});
+export type ValidationErrorDetail = z.infer<typeof ValidationErrorDetailSchema>;
+
+export const ApiErrorResponseSchema = z.object({
+  error: z.string(),
+  message: z.string(),
+  statusCode: z.number().int().min(400).max(599).optional(),
+  details: z.array(ValidationErrorDetailSchema).optional(),
+  timestamp: z.string().datetime().optional(),
+});
+export type ApiErrorResponse = z.infer<typeof ApiErrorResponseSchema>;
