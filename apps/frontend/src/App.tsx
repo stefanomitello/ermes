@@ -32,12 +32,7 @@ export function App() {
     return params;
   }, [filters.method, filters.agentId]);
 
-  const {
-    data,
-    isLoading,
-    isFetching,
-    refetch,
-  } = useTrafficLogs(serverFilters, {
+  const { data, isLoading, isFetching, refetch } = useTrafficLogs(serverFilters, {
     refetchInterval: autoRefresh ? 4000 : false,
   });
 
@@ -63,9 +58,7 @@ export function App() {
         const matchesUrl = log.url.toLowerCase().includes(query);
         const matchesAgent = log.agentId.toLowerCase().includes(query);
         const matchesMethod = log.method.toLowerCase().includes(query);
-        const matchesTags = log.threatTags?.some((t) =>
-          t.toLowerCase().includes(query)
-        );
+        const matchesTags = log.threatTags?.some((t) => t.toLowerCase().includes(query));
         if (!matchesUrl && !matchesAgent && !matchesMethod && !matchesTags) {
           return false;
         }
@@ -127,11 +120,7 @@ export function App() {
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Metric Cards Summary */}
-        <MetricsCards
-          logs={rawLogs}
-          total={data?.total}
-          isLoading={isLoading}
-        />
+        <MetricsCards logs={rawLogs} total={data?.total} isLoading={isLoading} />
 
         {/* Filters Toolbar */}
         <FiltersBar
@@ -171,7 +160,7 @@ export function App() {
 
       {/* Footer */}
       <footer className="border-t border-border/40 py-6 text-center text-xs text-muted-foreground">
-        Ermes SOC Platform • High Throughput HTTP Telemetry & Threat Analysis Engine
+        Ermes
       </footer>
     </div>
   );

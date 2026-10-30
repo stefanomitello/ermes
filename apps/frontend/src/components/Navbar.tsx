@@ -1,5 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Shield, Activity, Sun, Moon, RefreshCw, Zap, CheckCircle2, AlertTriangle } from 'lucide-react';
+import {
+  Shield,
+  Activity,
+  Sun,
+  Moon,
+  RefreshCw,
+  Zap,
+  CheckCircle2,
+  AlertTriangle,
+} from 'lucide-react';
 import { Button } from './ui/button.js';
 import { Spinner } from './ui/spinner.js';
 import { useBackendHealth } from '@/hooks/useTrafficLogs.js';
@@ -48,26 +57,16 @@ export function Navbar({
   const isOnline = !isError && health?.status === 'ok';
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/80 bg-background/80 backdrop-blur-md transition-colors">
+    <header className="sticky top-0 z-40 w-full border-b border-border/80 bg-[#e62d22] backdrop-blur-md transition-colors text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Brand */}
         <div className="flex items-center gap-3">
-          <div className="relative flex items-center justify-center size-10 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-500 shadow-md shadow-cyan-500/20 text-white font-bold">
-            <Shield className="size-5" />
-            <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-emerald-400 ring-2 ring-background animate-pulse" />
-          </div>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-black tracking-tight bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-300 bg-clip-text text-transparent">
-                ERMES
-              </span>
-              <span className="text-[10px] font-mono tracking-widest uppercase px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-semibold">
-                SOC Core
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground hidden sm:block">
-              Endpoint HTTP Threat Detection & Telemetry
-            </p>
+            <img
+              src="https://www.ermes.company/img/logo/ermes-hrz-red.webp"
+              alt="ERMES"
+              className="h-16"
+            />
           </div>
         </div>
 
@@ -86,7 +85,7 @@ export function Navbar({
                 }`}
               />
             </span>
-            <span className="font-medium text-foreground">
+            <span className="font-medium text-white">
               {isOnline ? 'Backend Online' : 'Backend Offline'}
             </span>
             {isOnline ? (
@@ -101,10 +100,14 @@ export function Navbar({
             size="sm"
             onClick={() => setAutoRefresh(!autoRefresh)}
             className={`hidden md:inline-flex text-xs h-8 gap-1.5 ${
-              autoRefresh ? 'border-cyan-500/40 text-cyan-400 bg-cyan-500/10' : 'text-muted-foreground'
+              autoRefresh
+                ? 'border-white-500/40 text-white bg-white-500/10'
+                : 'text-muted-foreground'
             }`}
           >
-            <Activity className={`size-3.5 ${autoRefresh ? 'animate-pulse text-cyan-400' : ''}`} />
+            <Activity
+              className={`size-3.5 ${autoRefresh ? 'animate-pulse text-white' : 'text-primary'}`}
+            />
             {autoRefresh ? 'Live Feed On' : 'Live Feed Paused'}
           </Button>
         </div>
@@ -116,11 +119,11 @@ export function Navbar({
             size="sm"
             onClick={onRefresh}
             disabled={isRefreshing}
-            className="h-9 px-3 gap-1.5"
+            className="h-9 px-3 gap-1.5 text-black dark:text-white"
             title="Refresh logs"
           >
-            <RefreshCw className={`size-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span className="hidden sm:inline">Refresh</span>
+            <RefreshCw className={`size-4 text-foreground ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline text-foreground">Refresh</span>
           </Button>
 
           <Button
@@ -130,7 +133,11 @@ export function Navbar({
             disabled={isSimulating}
             className="h-9 px-3.5 gap-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-medium shadow-md shadow-blue-500/25"
           >
-            {isSimulating ? <Spinner size={16} className="text-white" /> : <Zap className="size-4" />}
+            {isSimulating ? (
+              <Spinner size={16} className="text-white" />
+            ) : (
+              <Zap className="size-4" />
+            )}
             <span className="hidden sm:inline">Simulate Agent Ingestion</span>
             <span className="sm:hidden">Simulate</span>
           </Button>

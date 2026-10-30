@@ -1,11 +1,4 @@
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableHead,
-  TableRow,
-  TableCell,
-} from './ui/table.js';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from './ui/table.js';
 import { HttpMethodBadge, ThreatScoreBadge } from './ui/badge.js';
 import { Skeleton } from './ui/skeleton.js';
 import { Button } from './ui/button.js';
@@ -69,9 +62,7 @@ export function TrafficTable({
         <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-muted/40 border border-border mb-4">
           <Inbox className="size-7 text-muted-foreground" />
         </div>
-        <h3 className="text-base font-semibold text-foreground">
-          No HTTP traffic telemetry found
-        </h3>
+        <h3 className="text-base font-semibold text-foreground">No HTTP traffic telemetry found</h3>
         <p className="text-sm text-muted-foreground max-w-md mx-auto mt-1 mb-6">
           No logs match the current filters, or no telemetry has been transmitted by agents yet.
         </p>
@@ -114,8 +105,8 @@ export function TrafficTable({
                   isCritical
                     ? 'hover:bg-rose-500/10 bg-rose-500/5'
                     : isHighThreat
-                    ? 'hover:bg-amber-500/10 bg-amber-500/5'
-                    : 'hover:bg-muted/50'
+                      ? 'hover:bg-amber-500/10 bg-amber-500/5'
+                      : 'hover:bg-muted/50'
                 }`}
               >
                 {/* Timestamp */}
@@ -143,19 +134,12 @@ export function TrafficTable({
                 </TableCell>
 
                 {/* Status code */}
-                <TableCell className="text-center">
-                  {getStatusCodeBadge(log.statusCode)}
-                </TableCell>
+                <TableCell className="text-center">{getStatusCodeBadge(log.statusCode)}</TableCell>
 
                 {/* Threat Score */}
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <ThreatScoreBadge score={log.threatScore} />
-                    {log.threatTags && log.threatTags.length > 0 && (
-                      <span className="hidden xl:inline-block text-[10px] font-mono text-muted-foreground truncate max-w-[90px]">
-                        {log.threatTags[0]}
-                      </span>
-                    )}
                   </div>
                 </TableCell>
 
