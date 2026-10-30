@@ -5,6 +5,7 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { secureHeaders } from 'hono/secure-headers';
 import { connectMongo } from './db.js';
+import { agentRouter } from './routes/agent.routes.js';
 
 export const app = new Hono();
 
@@ -15,6 +16,8 @@ app.use('*', cors());
 app.get('/health', (c) => {
   return c.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+app.route('/agent', agentRouter);
 
 const PORT = Number(process.env.BACKEND_PORT) || 3000;
 
