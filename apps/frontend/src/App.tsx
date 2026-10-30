@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { SignedIn, SignedOut, SignIn } from '@clerk/clerk-react';
 import { Navbar } from './components/Navbar.js';
 import { MetricsCards } from './components/MetricsCards.js';
 import { FiltersBar, type FilterState } from './components/FiltersBar.js';
@@ -7,7 +8,7 @@ import { LogDetailModal } from './components/LogDetailModal.js';
 import { useTrafficLogs, useSimulateTrafficLog } from './hooks/useTrafficLogs.js';
 import type { TrafficLogEntry, TrafficLogsFilter } from '@ermes/shared';
 
-export function App() {
+function DashboardView() {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [selectedLog, setSelectedLog] = useState<TrafficLogEntry | null>(null);
 
@@ -18,7 +19,6 @@ export function App() {
     agentId: '',
   });
 
-  // Server query parameters
   const serverFilters: Partial<TrafficLogsFilter> = useMemo(() => {
     const params: Partial<TrafficLogsFilter> = {
       limit: 100,
@@ -40,7 +40,6 @@ export function App() {
 
   const rawLogs = useMemo(() => data?.logs || [], [data?.logs]);
 
-  // Available agent IDs for dropdown filter
   const availableAgents = useMemo(() => {
     const set = new Set<string>();
     rawLogs.forEach((l) => {
@@ -49,10 +48,8 @@ export function App() {
     return Array.from(set).sort();
   }, [rawLogs]);
 
-  // Client-side instant filtering for search query & severity threshold
   const filteredLogs = useMemo(() => {
     return rawLogs.filter((log) => {
-      // Search filter
       if (filters.search) {
         const query = filters.search.toLowerCase();
         const matchesUrl = log.url.toLowerCase().includes(query);
@@ -64,7 +61,6 @@ export function App() {
         }
       }
 
-      // Threat severity filter
       if (filters.threatSeverity) {
         const score = log.threatScore ?? 0;
         switch (filters.threatSeverity) {
@@ -83,12 +79,10 @@ export function App() {
         }
       }
 
-      // Method filter
       if (filters.method && log.method !== filters.method) {
         return false;
       }
 
-      // Agent filter
       if (filters.agentId && log.agentId !== filters.agentId) {
         return false;
       }
@@ -163,6 +157,43 @@ export function App() {
         Ermes
       </footer>
     </div>
+  );
+}
+
+function LoginView() {
+  return (
+    <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      {/* Subtle ambient light effects */}
+      <div className="absolute -top-32 -left-32 w-96 h-96 bg-red-600/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="w-full max-w-md flex flex-col items-center space-y-6 relative z-10">
+        <div className="flex flex-col items-center text-center space-y-3">
+          <img
+            src="https://www.ermes.company/img/logo/ermes-hrz-red.webp"
+            alt="ERMES"
+            className="h-16"
+          />
+        </div>
+
+        <div className="w-full flex justify-center   p-2">
+          <SignIn routing="hash" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function App() {
+  return (
+    <>
+      <SignedIn>
+        <DashboardView />
+      </SignedIn>
+      <SignedOut>
+        <LoginView />
+      </SignedOut>
+    </>
   );
 }
 

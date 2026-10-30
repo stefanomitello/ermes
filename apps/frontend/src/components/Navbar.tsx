@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import {
-  Shield,
   Activity,
   Sun,
   Moon,
@@ -9,6 +8,7 @@ import {
   CheckCircle2,
   AlertTriangle,
 } from 'lucide-react';
+import { SignedIn, UserButton } from '@clerk/clerk-react';
 import { Button } from './ui/button.js';
 import { Spinner } from './ui/spinner.js';
 import { useBackendHealth } from '@/hooks/useTrafficLogs.js';
@@ -101,7 +101,7 @@ export function Navbar({
             onClick={() => setAutoRefresh(!autoRefresh)}
             className={`hidden md:inline-flex text-xs h-8 gap-1.5 ${
               autoRefresh
-                ? 'border-white-500/40 text-white bg-white-500/10'
+                ? 'border-white/40 text-white bg-white/10'
                 : 'text-muted-foreground'
             }`}
           >
@@ -155,6 +155,20 @@ export function Navbar({
               <Moon className="size-4 text-slate-700 transition-transform hover:-rotate-12" />
             )}
           </Button>
+
+          {/* Clerk User Button */}
+          <SignedIn>
+            <div className="flex items-center pl-1">
+              <UserButton
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    avatarBox: 'size-8 ring-2 ring-white/20 hover:ring-white/40 transition-all',
+                  },
+                }}
+              />
+            </div>
+          </SignedIn>
         </div>
       </div>
     </header>

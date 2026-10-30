@@ -9,8 +9,22 @@ import type {
 const API_BASE = '/api/v1';
 
 let cachedToken: string | null = null;
+let clerkTokenGetter: (() => Promise<string | null>) | null = null;
+
+export function setClerkTokenGetter(getter: (() => Promise<string | null>) | null) {
+  clerkTokenGetter = getter;
+}
 
 export async function getAuthToken(): Promise<string> {
+  if (clerkTokenGetter) {
+    try {
+      const token = await clerkTokenGetter();
+      if (token) return token;
+    } catch (err) {
+      console.warn('Failed to retrieve Clerk token:', err);
+    }
+  }
+
   if (cachedToken) return cachedToken;
   try {
     const res = await fetch(`${API_BASE}/auth/agent/token`, {
@@ -27,7 +41,7 @@ export async function getAuthToken(): Promise<string> {
       return data.accessToken;
     }
   } catch {
-    // If auth fails or not enabled, continue
+    // Fallback if local auth endpoint is unavailable
   }
   return '';
 }
@@ -41,7 +55,8 @@ export async function checkBackendHealth(): Promise<{ status: string; timestamp?
 }
 
 export async function fetchTrafficLogs(
-  filters: Partial<TrafficLogsFilter> = {}
+  filters: Partial<TrafficLogsFilter> = {},
+  authToken?: string | null
 ): Promise<TrafficLogsListResponse> {
   const params = new URLSearchParams();
   if (filters.limit) params.set('limit', String(filters.limit));
@@ -60,13 +75,12 @@ export async function fetchTrafficLogs(
   if (filters.endDate) params.set('endDate', filters.endDate);
 
   const queryString = params.toString() ? `?${params.toString()}` : '';
-  const token = await getAuthToken();
+  const token = authToken || (await getAuthToken());
   const headers: Record<string, string> = {};
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  // Attempt standard API v1 path first, fallback to /agent/traffic_logs if needed
   let res = await fetch(`${API_BASE}/agent/traffic_logs${queryString}`, { headers });
   if (res.status === 404) {
     res = await fetch(`/agent/traffic_logs${queryString}`, { headers });
@@ -85,9 +99,10 @@ export async function fetchTrafficLogs(
 }
 
 export async function ingestTrafficLog(
-  payload: TrafficLogEntry | BatchTrafficLogs
+  payload: TrafficLogEntry | BatchTrafficLogs,
+  authToken?: string | null
 ): Promise<{ success: boolean; count: number; receivedAt: string }> {
-  const token = await getAuthToken();
+  const token = authToken || (await getAuthToken());
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };

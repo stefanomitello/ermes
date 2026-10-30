@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@clerk/clerk-react';
 import type { TrafficLogsFilter, TrafficLogsListResponse, TrafficLogEntry } from '@ermes/shared';
 import { fetchTrafficLogs, ingestTrafficLog, checkBackendHealth } from '@/api/client.js';
 
@@ -12,9 +13,21 @@ export function useTrafficLogs(
     enabled?: boolean;
   }
 ) {
+  const { getToken, isSignedIn } = useAuth();
+
   return useQuery<TrafficLogsListResponse, Error>({
-    queryKey: [TRAFFIC_LOGS_QUERY_KEY, filters],
-    queryFn: () => fetchTrafficLogs(filters),
+    queryKey: [TRAFFIC_LOGS_QUERY_KEY, filters, isSignedIn],
+    queryFn: async () => {
+      let token: string | null = null;
+      if (isSignedIn) {
+        try {
+          token = await getToken();
+        } catch (err) {
+          console.warn('Failed to retrieve Clerk token:', err);
+        }
+      }
+      return fetchTrafficLogs(filters, token);
+    },
     staleTime: 4000,
     refetchInterval: options?.refetchInterval ?? 5000,
     enabled: options?.enabled ?? true,
@@ -46,9 +59,19 @@ const SAMPLE_AGENTS = ['agent-recon-01', 'agent-sentinel-02', 'agent-scanner-03'
 
 export function useSimulateTrafficLog() {
   const queryClient = useQueryClient();
+  const { getToken, isSignedIn } = useAuth();
 
   return useMutation({
     mutationFn: async (customLog?: Partial<TrafficLogEntry>) => {
+      let token: string | null = null;
+      if (isSignedIn) {
+        try {
+          token = await getToken();
+        } catch (err) {
+          console.warn('Failed to retrieve Clerk token for simulation:', err);
+        }
+      }
+
       const template = SAMPLE_ENDPOINTS[Math.floor(Math.random() * SAMPLE_ENDPOINTS.length)];
       const randomAgent = SAMPLE_AGENTS[Math.floor(Math.random() * SAMPLE_AGENTS.length)];
       const randomStatusCode = [200, 201, 204, 400, 401, 403, 500, 502][
@@ -74,7 +97,7 @@ export function useSimulateTrafficLog() {
         threatTags: customLog?.threatTags || template.tags,
       };
 
-      return ingestTrafficLog(entry);
+      return ingestTrafficLog(entry, token);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [TRAFFIC_LOGS_QUERY_KEY] });
