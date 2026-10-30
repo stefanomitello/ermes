@@ -12,7 +12,7 @@ export async function sendTrafficLog(log: TrafficLogEntry, token?: string) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${agentConfig.backendUrl}/agent/traffic_logs`, {
+  const res = await fetch(`${agentConfig.backendUrl}/api/v1/agent/traffic_logs`, {
     method: 'POST',
     headers,
     body: JSON.stringify(log),

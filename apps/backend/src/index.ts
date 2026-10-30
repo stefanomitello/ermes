@@ -23,15 +23,11 @@ app.get('/health', (c) => {
 });
 
 // API Versioning: v1 endpoints
-const v1Router = new Hono();
-v1Router.route('/agent', agentRouter);
-v1Router.route('/auth', authRouter);
+const router = new Hono();
+router.route('/agent', agentRouter);
+router.route('/auth', authRouter);
 
-app.route('/api/v1', v1Router);
-
-// Unversioned aliases for backward compatibility
-app.route('/agent', agentRouter);
-app.route('/auth', authRouter);
+app.route('/api/v1', router);
 
 const PORT = Number(process.env.BACKEND_PORT) || 3000;
 
