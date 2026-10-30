@@ -3,10 +3,6 @@ import type { TrafficLogsFilter } from '@ermes/shared';
 import { TRAFFIC_LOGS_COLLECTION } from '../db.js';
 import type { TrafficLogDocument, InsertBatchResult } from '../models/traffic-log.model.js';
 
-/**
- * Port interface for Traffic Logs Data Access Layer (DAL).
- * Decoupled from transport and web frameworks (DIP).
- */
 export interface TrafficLogRepository {
   insertSingle(doc: TrafficLogDocument): Promise<{ insertedId: string }>;
   insertBatch(docs: TrafficLogDocument[]): Promise<InsertBatchResult>;
@@ -14,9 +10,6 @@ export interface TrafficLogRepository {
   countLogs(filter?: TrafficLogsFilter): Promise<number>;
 }
 
-/**
- * Concrete MongoDB native driver repository implementing TrafficLogRepository.
- */
 export class MongoTrafficLogRepository implements TrafficLogRepository {
   private readonly collection: Collection<TrafficLogDocument>;
 
@@ -24,9 +17,6 @@ export class MongoTrafficLogRepository implements TrafficLogRepository {
     this.collection = db.collection<TrafficLogDocument>(TRAFFIC_LOGS_COLLECTION);
   }
 
-  /**
-   * Builds a MongoDB filter from application filter options.
-   */
   private buildMongoFilter(filter?: TrafficLogsFilter): Filter<TrafficLogDocument> {
     if (!filter) {
       return {};
@@ -75,9 +65,6 @@ export class MongoTrafficLogRepository implements TrafficLogRepository {
     return query;
   }
 
-  /**
-   * Persists a single traffic log document into MongoDB.
-   */
   async insertSingle(doc: TrafficLogDocument): Promise<{ insertedId: string }> {
     const result = await this.collection.insertOne(doc);
     return {
@@ -85,9 +72,6 @@ export class MongoTrafficLogRepository implements TrafficLogRepository {
     };
   }
 
-  /**
-   * Persists a batch of traffic log documents into MongoDB.
-   */
   async insertBatch(docs: TrafficLogDocument[]): Promise<InsertBatchResult> {
     if (docs.length === 0) {
       return { insertedCount: 0, insertedIds: {} };
@@ -100,9 +84,6 @@ export class MongoTrafficLogRepository implements TrafficLogRepository {
     };
   }
 
-  /**
-   * Queries traffic logs applying filters, descending timeline sort and pagination.
-   */
   async findLogs(filter?: TrafficLogsFilter): Promise<TrafficLogDocument[]> {
     const mongoFilter = this.buildMongoFilter(filter);
     const limit = Math.min(Math.max(filter?.limit ?? 50, 1), 100);
@@ -117,9 +98,6 @@ export class MongoTrafficLogRepository implements TrafficLogRepository {
       .toArray();
   }
 
-  /**
-   * Counts the number of logs matching a filter query.
-   */
   async countLogs(filter?: TrafficLogsFilter): Promise<number> {
     const mongoFilter = this.buildMongoFilter(filter);
     return this.collection.countDocuments(mongoFilter);

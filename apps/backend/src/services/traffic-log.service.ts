@@ -1,17 +1,12 @@
 import type { TrafficLogEntry, TrafficLogsFilter, TrafficLogsListResponse } from '@ermes/shared';
 import type { TrafficLogRepository } from '../repositories/traffic-log.repository.js';
-import type { TrafficLogDocument } from '../models/traffic-log.model.js';
+import { validateTrafficLogEntry, type TrafficLogDocument } from '../models/traffic-log.model.js';
 
 export interface TrafficLogIngestResult {
   count: number;
   receivedAt: string;
 }
 
-/**
- * Service Layer: TrafficLogService
- * Pure business logic completely decoupled from Hono (req/res) and MongoDB native driver.
- * Uses TrafficLogRepository as an explicit dependency (Dependency Inversion).
- */
 export class TrafficLogService {
   constructor(private readonly repository?: TrafficLogRepository) {}
 
@@ -22,14 +17,17 @@ export class TrafficLogService {
     const list = Array.isArray(logs) ? logs : [logs];
     const receivedAt = new Date().toISOString();
 
-    const documents: TrafficLogDocument[] = list.map((log) => ({
-      ...log,
-      userId: context?.userId || log.userId || 'anonymous-user',
-      agentId: context?.agentId || log.agentId || 'unknown-agent',
-      receivedAt,
-    }));
+    const documents: TrafficLogDocument[] = list.map((log) => {
+      const validated = validateTrafficLogEntry(log);
+      return {
+        ...validated,
+        userId: context?.userId || validated.userId || 'anonymous-user',
+        agentId: context?.agentId || validated.agentId || 'unknown-agent',
+        receivedAt,
+      };
+    });
 
-    if (this.repository) {
+    if (this.repository && documents.length > 0) {
       await this.repository.insertBatch(documents);
     }
 
@@ -44,8 +42,14 @@ export class TrafficLogService {
       return { logs: [], total: 0 };
     }
 
-    const docs = await this.repository.findLogs(filter);
-    const total = await this.repository.countLogs(filter);
+    const sanitizedFilter: TrafficLogsFilter = {
+      ...filter,
+      limit: Math.min(Math.max(filter?.limit ?? 50, 1), 100),
+      page: Math.max(filter?.page ?? 1, 1),
+    };
+
+    const docs = await this.repository.findLogs(sanitizedFilter);
+    const total = await this.repository.countLogs(sanitizedFilter);
 
     const logs: TrafficLogEntry[] = docs.map((doc) => ({
       ...doc,
