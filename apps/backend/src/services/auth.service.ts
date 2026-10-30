@@ -28,8 +28,9 @@ export class AuthService {
       config?.jwtSecret || process.env.JWT_SECRET || 'ermes-development-secret-key-min-32-chars';
     this.jwtSecretBytes = new TextEncoder().encode(secret);
 
-    this.clerkJwtKey =
+    const rawKey =
       config?.clerkJwtKey || process.env.CLERK_JWT_KEY || process.env.CLERK_PEM_PUBLIC_KEY;
+    this.clerkJwtKey = rawKey ? rawKey.replace(/\\n/g, '\n') : undefined;
 
     this.clerkJwksUrl =
       config?.clerkJwksUrl ||

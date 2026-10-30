@@ -21,10 +21,14 @@ services:
     restart: unless-stopped
     ports:
       - '3000:3000'
+    env_file:
+      - ../../.env
     environment:
       NODE_ENV: production
       BACKEND_PORT: 3000
       MONGODB_URI: mongodb://mongodb:27017/ermes
+      CLERK_JWT_KEY: ${CLERK_JWT_KEY:-}
+      JWT_SECRET: ${JWT_SECRET:-ermes-development-secret-key-min-32-chars}
     depends_on:
       - mongodb
     networks:
