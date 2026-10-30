@@ -19,3 +19,12 @@ data/
 .DS_Store
 *.pem
 *.log
+docs/architecture/ARCHITECTURE.md
+docs/tasks/README.md
+docs/tasks/tasks-agent.md
+docs/tasks/tasks-backend.md
+docs/tasks/tasks-frontend.md
+docs/tasks/tasks-general.md
+AGENTS.md
+.agents/rules/ermes-rules.md
+.agents/skills/ermes-dev/SKILL.md
