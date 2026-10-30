@@ -1,6 +1,7 @@
 import './env.js';
 import type { TrafficLogEntry } from '@ermes/shared';
 import { agentConfig } from './config.js';
+import { generateTrafficLog } from './generator.js';
 
 export async function sendTrafficLog(log: TrafficLogEntry, token?: string) {
   const headers: Record<string, string> = {
@@ -30,20 +31,7 @@ export async function main() {
   console.log(`Connesso al backend: ${agentConfig.backendUrl}`);
   console.log(`Ms asleep: ${agentConfig.simulationIntervalMs}ms`);
 
-  const sampleLog: TrafficLogEntry = {
-    timestamp: new Date().toISOString(),
-    agentId: agentConfig.agentId,
-    userId: agentConfig.userId,
-    method: 'GET',
-    url: 'https://internal.company.corp/sensitive-docs',
-    headers: {
-      'user-agent': 'ErmesAgent/1.0',
-      accept: 'application/json',
-    },
-    statusCode: 200,
-    threatScore: 78,
-    threatTags: ['sensitive_resource_access', 'suspicious_time'],
-  };
+  const sampleLog = generateTrafficLog();
 
   const response = await sendTrafficLog(sampleLog, agentConfig.authToken);
   console.log(`Traffico inviato:`, response);
