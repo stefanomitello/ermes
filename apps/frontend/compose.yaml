@@ -1,0 +1,19 @@
+services:
+  frontend:
+    build:
+      context: ../..
+      dockerfile: apps/frontend/Dockerfile
+      target: frontend
+    container_name: ermes-frontend
+    restart: unless-stopped
+    ports:
+      - '5173:5173'
+    environment:
+      NODE_ENV: production
+    networks:
+      - ermes-network
+
+networks:
+  ermes-network:
+    name: ermes-network
+    driver: bridge
