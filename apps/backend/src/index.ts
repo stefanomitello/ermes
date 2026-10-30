@@ -39,7 +39,7 @@ async function bootstrap() {
       port: PORT,
     },
     (info) => {
-      console.log(`Backend avviato su ${process.env.BACKEND_URL}:${info.port}`);
+      console.log(`Backend avviato su http://localhost:${info.port}`);
     }
   );
 }

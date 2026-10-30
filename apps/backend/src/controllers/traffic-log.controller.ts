@@ -1,9 +1,34 @@
 import type { Context } from 'hono';
 import type { TrafficLogEntry, BatchTrafficLogs, TrafficLogsFilter } from '@ermes/shared';
+import { getDb } from '../db.js';
+import { MongoTrafficLogRepository } from '../repositories/traffic-log.repository.js';
 import { TrafficLogService } from '../services/traffic-log.service.js';
 
+export function getDefaultTrafficLogService(): TrafficLogService {
+  try {
+    const db = getDb();
+    return new TrafficLogService(new MongoTrafficLogRepository(db));
+  } catch {
+    return new TrafficLogService();
+  }
+}
+
 export class TrafficLogController {
-  constructor(private readonly service: TrafficLogService = new TrafficLogService()) {}
+  private readonly serviceProvider: () => TrafficLogService;
+
+  constructor(service?: TrafficLogService | (() => TrafficLogService)) {
+    if (typeof service === 'function') {
+      this.serviceProvider = service;
+    } else if (service) {
+      this.serviceProvider = () => service;
+    } else {
+      this.serviceProvider = getDefaultTrafficLogService;
+    }
+  }
+
+  private get service(): TrafficLogService {
+    return this.serviceProvider();
+  }
 
   async ingestTrafficLogs(c: Context) {
     const body = c.req.valid('json' as never) as TrafficLogEntry | BatchTrafficLogs;
