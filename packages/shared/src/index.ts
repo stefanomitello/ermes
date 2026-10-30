@@ -86,3 +86,37 @@ export const ApiErrorResponseSchema = z.object({
   timestamp: z.string().datetime().optional(),
 });
 export type ApiErrorResponse = z.infer<typeof ApiErrorResponseSchema>;
+
+export const AuthTokenRequestSchema = AgentCredentialsSchema;
+export type AuthTokenRequest = z.infer<typeof AuthTokenRequestSchema>;
+
+export const AuthTokenResponseSchema = z.object({
+  accessToken: z.string().min(1),
+  tokenType: z.literal('Bearer'),
+  expiresIn: z.number().positive(),
+});
+export type AuthTokenResponse = z.infer<typeof AuthTokenResponseSchema>;
+
+export const ClerkSessionClaimsSchema = z.object({
+  sub: z.string().min(1),
+  iss: z.string().url().optional(),
+  exp: z.number().int(),
+  iat: z.number().int().optional(),
+  nbf: z.number().int().optional(),
+  sid: z.string().optional(),
+  org_id: z.string().optional(),
+  org_slug: z.string().optional(),
+  org_role: z.string().optional(),
+  org_permissions: z.array(z.string()).optional(),
+  email: z.string().email().optional(),
+});
+export type ClerkSessionClaims = z.infer<typeof ClerkSessionClaimsSchema>;
+
+export const AuthContextSchema = z.object({
+  type: z.enum(['user', 'agent']),
+  userId: z.string().min(1),
+  agentId: z.string().optional(),
+  orgId: z.string().optional(),
+  roles: z.array(z.string()).default([]),
+});
+export type AuthContext = z.infer<typeof AuthContextSchema>;
