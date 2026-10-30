@@ -9,6 +9,11 @@ COPY apps/frontend/package.json ./apps/frontend/
 RUN pnpm install --frozen-lockfile || pnpm install
 
 FROM dependencies AS build
+ARG VITE_CLERK_PUBLISHABLE_KEY
+ARG CLERK_PUBLISHABLE_KEY
+ENV VITE_CLERK_PUBLISHABLE_KEY=${VITE_CLERK_PUBLISHABLE_KEY}
+ENV CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY}
+
 COPY tsconfig.base.json ./
 COPY packages/ ./packages/
 COPY apps/frontend/ ./apps/frontend/
