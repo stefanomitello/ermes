@@ -6,12 +6,16 @@ import { logger } from 'hono/logger';
 import { secureHeaders } from 'hono/secure-headers';
 import { connectMongo } from './db.js';
 import { agentRouter } from './routes/agent.routes.js';
+import { errorHandler, notFoundHandler } from './middlewares/error-handler.middleware.js';
 
 export const app = new Hono();
 
 app.use('*', logger());
 app.use('*', secureHeaders());
 app.use('*', cors());
+
+app.notFound(notFoundHandler);
+app.onError(errorHandler);
 
 app.get('/health', (c) => {
   return c.json({ status: 'ok', timestamp: new Date().toISOString() });
