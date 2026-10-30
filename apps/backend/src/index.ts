@@ -21,7 +21,7 @@ const PORT = Number(process.env.BACKEND_PORT) || 3000;
 async function bootstrap() {
   try {
     await connectMongo();
-    console.log(`MongoDB connessso.`);
+    console.log(`MongoDB connesso.`);
   } catch (err) {
     console.warn(`Warning: Mongo ha un errore: ${(err as Error).message}`);
   }
@@ -32,7 +32,7 @@ async function bootstrap() {
       port: PORT,
     },
     (info) => {
-      console.log(`Backend avviato su http://localhost:${info.port}`);
+      console.log(`Backend avviato su ${process.env.BACKEND_URL}:${info.port}`);
     }
   );
 }
