@@ -22,6 +22,14 @@ app.get('/health', (c) => {
   return c.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// API Versioning: v1 endpoints
+const v1Router = new Hono();
+v1Router.route('/agent', agentRouter);
+v1Router.route('/auth', authRouter);
+
+app.route('/api/v1', v1Router);
+
+// Unversioned aliases for backward compatibility
 app.route('/agent', agentRouter);
 app.route('/auth', authRouter);
 
@@ -46,4 +54,6 @@ async function bootstrap() {
   );
 }
 
-bootstrap();
+if (process.env.NODE_ENV !== 'test') {
+  bootstrap();
+}

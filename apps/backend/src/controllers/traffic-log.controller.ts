@@ -1,36 +1,11 @@
 import type { Context } from 'hono';
 import type { TrafficLogEntry, BatchTrafficLogs, TrafficLogsFilter } from '@ermes/shared';
-import { getDb } from '../db.js';
-import { MongoTrafficLogRepository } from '../repositories/traffic-log.repository.js';
-import { TrafficLogService } from '../services/traffic-log.service.js';
-
-export function getDefaultTrafficLogService(): TrafficLogService {
-  try {
-    const db = getDb();
-    return new TrafficLogService(new MongoTrafficLogRepository(db));
-  } catch {
-    return new TrafficLogService();
-  }
-}
+import { TrafficLogService, defaultTrafficLogService } from '../services/traffic-log.service.js';
 
 export class TrafficLogController {
-  private readonly serviceProvider: () => TrafficLogService;
+  constructor(private readonly service: TrafficLogService = defaultTrafficLogService) {}
 
-  constructor(service?: TrafficLogService | (() => TrafficLogService)) {
-    if (typeof service === 'function') {
-      this.serviceProvider = service;
-    } else if (service) {
-      this.serviceProvider = () => service;
-    } else {
-      this.serviceProvider = getDefaultTrafficLogService;
-    }
-  }
-
-  private get service(): TrafficLogService {
-    return this.serviceProvider();
-  }
-
-  async ingestTrafficLogs(c: Context) {
+  ingestTrafficLogs = async (c: Context) => {
     const body = c.req.valid('json' as never) as TrafficLogEntry | BatchTrafficLogs;
     const logsToIngest = 'logs' in body ? body.logs : [body];
     const auth = typeof c.get === 'function' ? c.get('auth') : undefined;
@@ -48,9 +23,9 @@ export class TrafficLogController {
       },
       201
     );
-  }
+  };
 
-  async getTrafficLogs(c: Context) {
+  getTrafficLogs = async (c: Context) => {
     const query = c.req.query();
     const filter: TrafficLogsFilter = {
       limit: query.limit ? Number(query.limit) : 50,
@@ -75,13 +50,10 @@ export class TrafficLogController {
       },
       200
     );
-  }
+  };
 }
 
 export const defaultTrafficLogController = new TrafficLogController();
 
-export const ingestTrafficLogsController = (c: Context) =>
-  defaultTrafficLogController.ingestTrafficLogs(c);
-
-export const getTrafficLogsController = (c: Context) =>
-  defaultTrafficLogController.getTrafficLogs(c);
+export const ingestTrafficLogsController = defaultTrafficLogController.ingestTrafficLogs;
+export const getTrafficLogsController = defaultTrafficLogController.getTrafficLogs;

@@ -133,7 +133,7 @@ export class AuthService {
     try {
       return await this.verifyAgentToken(token);
     } catch {
-      console.log('Failed to verify Agent token');
+      // Not a valid agent token, try Clerk token verification
     }
 
     try {

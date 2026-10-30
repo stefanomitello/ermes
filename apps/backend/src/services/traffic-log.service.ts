@@ -1,5 +1,8 @@
 import type { TrafficLogEntry, TrafficLogsFilter, TrafficLogsListResponse } from '@ermes/shared';
-import type { TrafficLogRepository } from '../repositories/traffic-log.repository.js';
+import {
+  type TrafficLogRepository,
+  defaultTrafficLogRepository,
+} from '../repositories/traffic-log.repository.js';
 import { validateTrafficLogEntry, type TrafficLogDocument } from '../models/traffic-log.model.js';
 
 export interface TrafficLogIngestResult {
@@ -8,7 +11,7 @@ export interface TrafficLogIngestResult {
 }
 
 export class TrafficLogService {
-  constructor(private readonly repository?: TrafficLogRepository) {}
+  constructor(private readonly repository: TrafficLogRepository = defaultTrafficLogRepository) {}
 
   async ingestLogs(
     logs: TrafficLogEntry | TrafficLogEntry[],
@@ -27,7 +30,7 @@ export class TrafficLogService {
       };
     });
 
-    if (this.repository && documents.length > 0) {
+    if (documents.length > 0) {
       await this.repository.insertBatch(documents);
     }
 
@@ -38,10 +41,6 @@ export class TrafficLogService {
   }
 
   async getLogs(filter?: TrafficLogsFilter): Promise<TrafficLogsListResponse> {
-    if (!this.repository) {
-      return { logs: [], total: 0 };
-    }
-
     const sanitizedFilter: TrafficLogsFilter = {
       ...filter,
       limit: Math.min(Math.max(filter?.limit ?? 50, 1), 100),
@@ -62,3 +61,5 @@ export class TrafficLogService {
     };
   }
 }
+
+export const defaultTrafficLogService = new TrafficLogService();
