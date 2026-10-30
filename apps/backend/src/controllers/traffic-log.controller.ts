@@ -1,31 +1,58 @@
 import type { Context } from 'hono';
-import type { TrafficLogEntry, BatchTrafficLogs } from '@ermes/shared';
+import type { TrafficLogEntry, BatchTrafficLogs, TrafficLogsFilter } from '@ermes/shared';
+import { TrafficLogService } from '../services/traffic-log.service.js';
 
-export async function ingestTrafficLogsController(c: Context) {
-  const body = c.req.valid('json' as never) as TrafficLogEntry | BatchTrafficLogs;
-  const logsToIngest = 'logs' in body ? body.logs : [body];
+export class TrafficLogController {
+  constructor(private readonly service: TrafficLogService = new TrafficLogService()) {}
 
-  return c.json(
-    {
-      success: true,
-      count: logsToIngest.length,
-      receivedAt: new Date().toISOString(),
-    },
-    201
-  );
+  async ingestTrafficLogs(c: Context) {
+    const body = c.req.valid('json' as never) as TrafficLogEntry | BatchTrafficLogs;
+    const logsToIngest = 'logs' in body ? body.logs : [body];
+
+    const result = await this.service.ingestLogs(logsToIngest);
+
+    return c.json(
+      {
+        success: true,
+        count: result.count,
+        receivedAt: result.receivedAt,
+      },
+      201
+    );
+  }
+
+  async getTrafficLogs(c: Context) {
+    const query = c.req.query();
+    const filter: TrafficLogsFilter = {
+      limit: query.limit ? Number(query.limit) : 50,
+      page: query.page ? Number(query.page) : 1,
+      agentId: query.agentId,
+      userId: query.userId,
+      method: query.method as TrafficLogsFilter['method'],
+      threatScoreMin: query.threatScoreMin ? Number(query.threatScoreMin) : undefined,
+      threatScoreMax: query.threatScoreMax ? Number(query.threatScoreMax) : undefined,
+      search: query.search,
+      startDate: query.startDate,
+      endDate: query.endDate,
+    };
+
+    const response = await this.service.getLogs(filter);
+
+    return c.json(
+      {
+        ...response,
+        limit: filter.limit,
+        agentId: filter.agentId || null,
+      },
+      200
+    );
+  }
 }
 
-export async function getTrafficLogsController(c: Context) {
-  const agentId = c.req.query('agentId');
-  const limit = Math.min(Number(c.req.query('limit')) || 50, 100);
+export const defaultTrafficLogController = new TrafficLogController();
 
-  return c.json(
-    {
-      logs: [],
-      total: 0,
-      limit,
-      agentId: agentId || null,
-    },
-    200
-  );
-}
+export const ingestTrafficLogsController = (c: Context) =>
+  defaultTrafficLogController.ingestTrafficLogs(c);
+
+export const getTrafficLogsController = (c: Context) =>
+  defaultTrafficLogController.getTrafficLogs(c);
