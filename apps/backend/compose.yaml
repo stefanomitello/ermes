@@ -12,6 +12,24 @@ services:
     networks:
       - ermes-network
 
+  backend:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      target: backend
+    container_name: ermes-backend
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: production
+      BACKEND_PORT: 3000
+      MONGODB_URI: mongodb://mongodb:27017/ermes
+    depends_on:
+      - mongodb
+    networks:
+      - ermes-network
+
 networks:
   ermes-network:
     name: ermes-network
