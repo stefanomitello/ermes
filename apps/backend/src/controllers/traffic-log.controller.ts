@@ -33,8 +33,12 @@ export class TrafficLogController {
   async ingestTrafficLogs(c: Context) {
     const body = c.req.valid('json' as never) as TrafficLogEntry | BatchTrafficLogs;
     const logsToIngest = 'logs' in body ? body.logs : [body];
+    const auth = typeof c.get === 'function' ? c.get('auth') : undefined;
 
-    const result = await this.service.ingestLogs(logsToIngest);
+    const result = await this.service.ingestLogs(logsToIngest, {
+      userId: auth?.userId,
+      agentId: auth?.agentId,
+    });
 
     return c.json(
       {

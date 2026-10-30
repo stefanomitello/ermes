@@ -6,6 +6,7 @@ import { logger } from 'hono/logger';
 import { secureHeaders } from 'hono/secure-headers';
 import { connectMongo } from './db.js';
 import { agentRouter } from './routes/agent.routes.js';
+import { authRouter } from './routes/auth.routes.js';
 import { errorHandler, notFoundHandler } from './middlewares/error-handler.middleware.js';
 
 export const app = new Hono();
@@ -22,6 +23,7 @@ app.get('/health', (c) => {
 });
 
 app.route('/agent', agentRouter);
+app.route('/auth', authRouter);
 
 const PORT = Number(process.env.BACKEND_PORT) || 3000;
 
